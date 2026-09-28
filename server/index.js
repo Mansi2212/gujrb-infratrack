@@ -2,8 +2,6 @@ require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { execFile } = require('child_process');
-const path = require('path');
 
 const app = express();
 
@@ -22,36 +20,6 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/users', require('./routes/users'));
-
-app.get('/api/admin/seed', (req, res) => {
-  const seedKey = req.query.key;
-
-  if (seedKey !== process.env.SEED_KEY) {
-    return res.status(403).json({ error: 'Unauthorized' });
-  }
-
-  execFile(
-    process.execPath,
-    [path.join(__dirname, 'seed', 'index.js')],
-    { env: process.env },
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error(stderr || error.message);
-        return res.status(500).json({
-          success: false,
-          error: stderr || error.message
-        });
-      }
-
-      console.log(stdout);
-      res.json({
-        success: true,
-        message: 'Database seeded successfully',
-        output: stdout
-      });
-    }
-  );
-});
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }));
